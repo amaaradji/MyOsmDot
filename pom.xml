@@ -36,6 +36,11 @@
       <artifactId>rinsim-geom</artifactId>
       <version>${rinsim.version}</version>
     </dependency>
+    <dependency>
+    	<groupId>commons-io</groupId>
+    	<artifactId>commons-io</artifactId>
+    	<version>2.6</version>
+    </dependency>
   </dependencies>
   
   	<build>
@@ -62,6 +67,42 @@
 					<source>${maven.compiler.source}</source>
 					<target>${maven.compiler.target}</target>
 				</configuration>
+			</plugin>
+			
+			<!-- Build an executable JAR -->			
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.4</version>
+				<configuration>
+					<archive>
+						<manifest>
+							<mainClass>com.github.vincentvangestel.osmdot.OsmConverter</mainClass>
+						</manifest>
+					</archive>
+				</configuration>
+			</plugin>
+			<plugin>
+			      <artifactId>maven-assembly-plugin</artifactId>
+			      <configuration>
+			        <archive>
+			          <manifest>
+			            <mainClass>com.github.vincentvangestel.osmdot.OsmConverter</mainClass>
+			          </manifest>
+			        </archive>
+			        <descriptorRefs>
+			          <descriptorRef>jar-with-dependencies</descriptorRef>
+			        </descriptorRefs>
+			      </configuration>
+			      <executions>
+				    <execution>
+				      <id>make-assembly</id> <!-- this is used for inheritance merges -->
+				      <phase>package</phase> <!-- bind to the packaging phase -->
+				      <goals>
+				        <goal>single</goal>
+				      </goals>
+				    </execution>
+				  </executions>
 			</plugin>
 		</plugins>
 	</build>

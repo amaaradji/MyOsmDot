@@ -25,8 +25,13 @@ public class CenterPruner implements Pruner {
 		Point center = getCenterMostPoint(g);
 		
 		List<Point> toRemove = new ArrayList<>();
-		
+		int progress = 0;
+		int numberOfNodes = g.getNumberOfNodes();
+		System.out.println("CenterPruning... ("+numberOfNodes+")");
 		for(Point node : g.getNodes()) {
+			progress ++;
+			if (progress%1000 == 0)
+				System.out.print("\r" + (progress*100/numberOfNodes) +"%");
 			try {
 				Graphs.shortestPathEuclideanDistance(g, center, node);
 				Graphs.shortestPathEuclideanDistance(g, node, center);
@@ -36,9 +41,12 @@ public class CenterPruner implements Pruner {
 			}
 		}
 		
+		
 		for(Point node : toRemove) {
 			g.removeNode(node);
 		}
+		
+		System.out.println("...DONE");
 		
 		Logger.getGlobal().info("CenterPruner pruned " + toRemove.size() + " nodes from the graph");
 		return g;

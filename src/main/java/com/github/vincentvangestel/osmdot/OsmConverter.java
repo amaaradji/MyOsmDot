@@ -20,7 +20,10 @@ import com.github.rinde.rinsim.geom.MultiAttributeData;
 import com.github.rinde.rinsim.geom.Point;
 import com.github.rinde.rinsim.geom.TableGraph;
 import com.github.rinde.rinsim.geom.io.DotGraphIO;
+import com.github.vincentvangestel.osmdot.pruner.CenterPruner;
+import com.github.vincentvangestel.osmdot.pruner.EfficientCenterPruner;
 import com.github.vincentvangestel.osmdot.pruner.Pruner;
+import com.github.vincentvangestel.osmdot.pruner.RoundAboutPruner;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
@@ -36,6 +39,22 @@ public class OsmConverter {
 	
 	private List<Pruner> pruners = new ArrayList<>();
 	private boolean inputIsDot = false;
+	
+	public static void main(String[] args) {
+		OsmConverter myOsmConverter = new OsmConverter();
+		String mapName = "/home/abdu/eclipse-workspace/dubai.osm";
+		if (args.length > 0) {
+			mapName = args[0];
+		}
+		
+		myOsmConverter.setOutputDir((new java.io.File(mapName)).getParent());
+		myOsmConverter.withOutputName(org.apache.commons.io.FilenameUtils.getBaseName(mapName) + ".dot");
+//		myOsmConverter.withPruner(new CenterPruner());
+		myOsmConverter.withPruner(new EfficientCenterPruner());
+		myOsmConverter.convert(mapName);
+		System.out.println("Finished");
+	}
+	
 	
 	/**
 	 * Sets the output folder of any newly converted osm file by this {@link OsmConverter}.
@@ -76,22 +95,32 @@ public class OsmConverter {
 	
 	            graph = new TableGraph<MultiAttributeData>();
 	
+	            System.out.print("parsing... ");
 	            OSMParser parser = new OSMParser(graph);
 	            xmlReader.setContentHandler(parser);
 	            xmlReader.setErrorHandler(parser);
 	            xmlReader.parse(inputSource);
+	            System.out.println("DONE");
 	
 	            // remove circular connections
+	            int progress = 0;
+	    		int numberOfCon = graph.getNumberOfConnections();
+	    		System.out.println("removing circular connections ("+numberOfCon+")");
 	            List<Connection<MultiAttributeData>> removeList = new ArrayList<Connection<MultiAttributeData>>();
 	            for (Connection<MultiAttributeData> connection : graph
 	                    .getConnections()) {
-	                if (connection.from().equals(connection.to())) {
+	                progress++;
+	                if (progress%1000 == 0) {
+	    				System.out.print("\r"+ (progress*100/numberOfCon) +"%");
+	    				}
+	            	if (connection.from().equals(connection.to())) {
 	                    removeList.add(connection);
 	                }
 	            }
 	            for (Connection<MultiAttributeData> connection : removeList) {
 	                graph.removeConnection(connection.from(), connection.to());
 	            }
+	            System.out.println("...DONE");
         	}
             // System.out.println(highwayNames.toString());
             
@@ -184,6 +213,7 @@ public class OsmConverter {
                 // MERCATOR:
                 double x = scale * lon * METER_TO_KM; // Math.round(earthRadius *
                                         // Math.cos(lat) * Math.sin(lon));
+//                lon = x / METER_TO_KM / scale;
                 double y = scale * METER_TO_KM
                         * Math.toDegrees(1.0 / Math.sinh(Math.tan(Math
                                 .toRadians(lat))));// Math.log(Math.tan(.25
@@ -194,6 +224,8 @@ public class OsmConverter {
                                                    // *
                                                    // gradeToRadian(lat)));
 
+//                lat = Math.toDegrees(  Math.atan(asinh(1.0 /Math.toRadians(y/ (scale * METER_TO_KM) )))) ;
+                		
                 // check: http://www.movable-type.co.uk/scripts/latlong.html for
                 // a great explanation
 
@@ -234,7 +266,11 @@ public class OsmConverter {
             }
         }
 
-        @Override
+        double asinh(double x) {
+            return Math.log(x + Math.sqrt(x*x + 1.0));
+        }
+
+		@Override
         public void endElement(String uri, String localName, String qName)
                 throws SAXException {
             if (localName.equals("way")) {
@@ -293,10 +329,10 @@ public class OsmConverter {
                     isValidRoad = true;
                 } else if (attributes.getValue("k").equals("maxspeed")) {
                     try {
-//                        maxSpeed = 1000.0 * Integer.parseInt(attributes
-//                                .getValue("v").replaceAll("\\D", ""));
-                    	maxSpeed = Integer.parseInt(attributes
+                        maxSpeed = 1000.0 * Integer.parseInt(attributes
                                 .getValue("v").replaceAll("\\D", ""));
+//                    	maxSpeed = Integer.parseInt(attributes
+//                                .getValue("v").replaceAll("\\D", ""));
                     } catch (NumberFormatException nfe) {
                         // ignore if this happens, it means that no max speed
                         // was defined
@@ -321,7 +357,8 @@ public class OsmConverter {
                         		.setLength(length)
                         		.addAttribute("ts", maxSpeed);
                        	if(name.isPresent()) {
-                       		data.addAttribute("n", name.get());
+//                       		data.addAttribute("n", name.get());
+                       		data.addAttribute("n", name.get().replace(",", ""));
                        	}
                         if (!graph.hasConnection(from, to)) {
                             if(!Double.isNaN(maxSpeed)) { data.setMaxSpeed(maxSpeed); }

@@ -39,7 +39,7 @@ public class RoundAboutPruner implements Pruner {
 		// For each connection branch forwards
 		int iteration = 1;
 		for(Connection<MultiAttributeData> conn : g.getConnections()) {
-			Logger.getGlobal().info("RoundAboutPruner handling connection " + iteration + " out of " + g.getNumberOfConnections()); iteration++;
+//			Logger.getGlobal().info("RoundAboutPruner handling connection " + iteration + " out of " + g.getNumberOfConnections()); iteration++;
 			
 			Optional<List<Connection<MultiAttributeData>>> path = branchConn(conn, new LinkedList<Connection<MultiAttributeData>>(), 0, g);
 			
