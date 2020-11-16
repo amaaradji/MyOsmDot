@@ -42,7 +42,7 @@ public class OsmConverter {
 	
 	public static void main(String[] args) {
 		OsmConverter myOsmConverter = new OsmConverter();
-		String mapName = "/home/abdu/eclipse-workspace/dubai.osm";
+		String mapName = "/home/abdu/eclipse-workspace/test1.osm";
 		if (args.length > 0) {
 			mapName = args[0];
 		}
@@ -211,19 +211,20 @@ public class OsmConverter {
                 // sinLattitude)) / (4 * Math.PI));
 
                 // MERCATOR:
-                double x = scale * lon * METER_TO_KM; // Math.round(earthRadius *
+//                double x = scale * lon * METER_TO_KM; // Math.round(earthRadius *
                                         // Math.cos(lat) * Math.sin(lon));
+                double x = lon;
 //                lon = x / METER_TO_KM / scale;
-                double y = scale * METER_TO_KM
-                        * Math.toDegrees(1.0 / Math.sinh(Math.tan(Math
-                                .toRadians(lat))));// Math.log(Math.tan(.25
+//                double y = scale * METER_TO_KM
+//                        * Math.toDegrees(1.0 / Math.sinh(Math.tan(Math
+//                                .toRadians(lat))));// Math.log(Math.tan(.25
                                                    // *
                                                    // Math.PI
                                                    // +
                                                    // .5
                                                    // *
                                                    // gradeToRadian(lat)));
-
+                double y = lat;
 //                lat = Math.toDegrees(  Math.atan(asinh(1.0 /Math.toRadians(y/ (scale * METER_TO_KM) )))) ;
                 		
                 // check: http://www.movable-type.co.uk/scripts/latlong.html for
