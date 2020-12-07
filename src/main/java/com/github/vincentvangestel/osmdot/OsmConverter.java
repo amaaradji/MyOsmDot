@@ -330,10 +330,8 @@ public class OsmConverter {
                     isValidRoad = true;
                 } else if (attributes.getValue("k").equals("maxspeed")) {
                     try {
-                        maxSpeed = 1000.0 * Integer.parseInt(attributes
-                                .getValue("v").replaceAll("\\D", ""));
-//                    	maxSpeed = Integer.parseInt(attributes
-//                                .getValue("v").replaceAll("\\D", ""));
+                        maxSpeed = Integer.parseInt(attributes
+                                .getValue("v").replaceAll("[^0-9]", ""));
                     } catch (NumberFormatException nfe) {
                         // ignore if this happens, it means that no max speed
                         // was defined
